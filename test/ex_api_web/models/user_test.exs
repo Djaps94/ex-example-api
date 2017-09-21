@@ -1,5 +1,5 @@
 defmodule ExApi.UserTest do
-  use ExApi.DataCase
+  use ExApi.DataCase, async: true
 
   alias ExApi.User
 
@@ -7,9 +7,15 @@ defmodule ExApi.UserTest do
   @invalid_attributes %{}
 
   test "user with valid attributes" do
-    changeset = User.changeset(%User{}, @valid_attributes)
+    changeset = User.registration_changeset(%User{}, @valid_attributes)
 
     assert changeset.valid?
+  end
+
+  test "user with invalid attributes" do
+    changeset = User.registration_changeset(%User{}, @invalid_attributes)
+
+    refute changeset.valid?
   end
 
 end
