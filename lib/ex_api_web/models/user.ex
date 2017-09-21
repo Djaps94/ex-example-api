@@ -14,6 +14,7 @@ defmodule ExApi.User do
     changeset
     |> cast(params, [:name, :email, :password])
     |> validate_required([:name, :email])
+    |> validate_format(:email, ~r/@/)
   end
 
 
