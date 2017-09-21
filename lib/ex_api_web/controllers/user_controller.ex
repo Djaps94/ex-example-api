@@ -5,7 +5,7 @@ defmodule ExApiWeb.UserController do
 
   def index(conn, _params) do
     users = Repo.all(User)
-    render conn, "user.json", %{users: users}
+    render(conn, "index.json", users: users)
   end
 
   def create(conn, _params) do
