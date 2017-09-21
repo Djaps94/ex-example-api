@@ -23,6 +23,8 @@ defmodule ExApiWeb do
       import Plug.Conn
       import ExApiWeb.Router.Helpers
       import ExApiWeb.Gettext
+      import Ecto
+      alias ExApi.Repo
     end
   end
 
