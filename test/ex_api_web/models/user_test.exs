@@ -31,8 +31,8 @@ defmodule ExApi.UserTest do
   test "user with missing name" do
     changeset = User.registration_changeset(%User{},
                                             %{email: "johndoe@gmail.com",
-                                              password: "doedoe"
-                                            })
+                                              password: "doedoe"}
+                                           )
     {error_message, _} = changeset.errors[:name]
 
     assert error_message == "can't be blank"
@@ -40,8 +40,10 @@ defmodule ExApi.UserTest do
   end
 
   test "user with missing email" do
-    changeset = User.registration_changeset(%User{}, %{name: "John",
-                                                       password: "DoeDoe"})
+    changeset = User.registration_changeset(%User{},
+                                            %{name: "John",
+                                              password: "DoeDoe"}
+                                           )
     {error_message, _} = changeset.errors[:email]
 
     assert error_message == "can't be blank"

@@ -4,6 +4,7 @@ defmodule ExApi.UserControllerTest do
   alias ExApi.{User, Repo}
 
   @user %{name: "John", email: "doe@gmail.com", password: "pass"}
+  @user_without_pass %{name: "John", email: "doe@gmail.com"}
 
   setup do
     conn =
@@ -33,7 +34,22 @@ defmodule ExApi.UserControllerTest do
 
   describe "create/2 action" do
     test "creates and renders user", %{conn: conn} do
-      conn = get conn, user_path(conn, :index)
+      response = post(conn, user_path(conn, :create), user: @user)
+                 |> json_response(201)
+
+      expected = %{
+        "data" => %{"name" => "John", "email" => "doe@gmail.com", "password" => "pass"}
+      }
+
+      assert expected == response
+      assert Repo.get_by(User, %{name: "John"})
+    end
+
+    test "creates and renders when password is not suplied", %{conn: conn} do
+      response = post(conn, user_path(conn, :create), user: @user_without_pass)
+                 |> json_response(201)
+
+      assert response["data"]["password"]
     end
   end
 end
