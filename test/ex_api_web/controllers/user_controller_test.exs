@@ -32,24 +32,28 @@ defmodule ExApi.UserControllerTest do
     assert expected == response
   end
 
-  describe "create/2 action" do
-    test "creates and renders user", %{conn: conn} do
-      response = post(conn, user_path(conn, :create), user: @user)
-                 |> json_response(201)
+  test "creates and renders user", %{conn: conn} do
+    response = post(conn, user_path(conn, :create), user: @user)
+               |> json_response(201)
 
-      expected = %{
-        "data" => %{"name" => "John", "email" => "doe@gmail.com", "password" => "pass"}
-      }
+    expected = %{
+      "data" => %{"name" => "John", "email" => "doe@gmail.com", "password" => "pass"}
+    }
 
-      assert expected == response
-      assert Repo.get_by(User, %{name: "John"})
-    end
+    assert expected == response
+    assert Repo.get_by(User, %{name: "John"})
+  end
 
-    test "creates and renders when password is not suplied", %{conn: conn} do
-      response = post(conn, user_path(conn, :create), user: @user_without_pass)
-                 |> json_response(201)
+  test "creates and renders user when password is not suplied", %{conn: conn} do
+    response = post(conn, user_path(conn, :create), user: @user_without_pass)
+               |> json_response(201)
 
-      assert response["data"]["password"]
-    end
+    assert response["data"]["password"]
+  end
+
+  test "doesn't create and render user when data is invalid", %{conn: conn} do
+    response = post(conn, user_path(conn, :create), user: %{}) |> json_response(422)
+
+    assert response["errors"] != %{}
   end
 end
