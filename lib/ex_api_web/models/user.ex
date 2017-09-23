@@ -1,4 +1,4 @@
-defmodule ExApi.User do
+defmodule ExApiWeb.User do
   @doc """
   Module represents user data type with name, email and a password,
   which maps to database table of the same name and vica versa.
@@ -10,7 +10,7 @@ defmodule ExApi.User do
     field :name, :string
     field :email, :string
     field :password, :string
-    has_many :bookmarks, ExApi.Bookmark
+    has_many :bookmarks, ExApiWeb.Bookmark
 
     timestamps()
   end

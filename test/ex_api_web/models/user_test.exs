@@ -1,7 +1,7 @@
 defmodule ExApi.UserTest do
   use ExApi.DataCase, async: true
 
-  alias ExApi.User
+  alias ExApiWeb.User
 
   @valid_attributes %{name: "John", email: "johndoe@gmail.com"}
   @invalid_attributes %{}

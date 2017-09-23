@@ -1,7 +1,7 @@
 defmodule ExApiWeb.UserController do
   use ExApiWeb, :controller
 
-  alias ExApi.User
+  alias ExApiWeb.User
 
   def index(conn, _params) do
     users = Repo.all(User)

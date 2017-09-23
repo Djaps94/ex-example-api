@@ -1,7 +1,8 @@
-defmodule ExApi.UserControllerTest do
+defmodule ExApiWeb.UserControllerTest do
   use ExApiWeb.ConnCase
 
-  alias ExApi.{User, Repo}
+  alias ExApiWeb.User
+  alias ExApi.Repo
 
   @user %{name: "John", email: "doe@gmail.com", password: "pass"}
   @user_without_pass %{name: "John", email: "doe@gmail.com"}

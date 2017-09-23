@@ -1,8 +1,8 @@
-defmodule ExApi.Bookmark do
+defmodule ExApiWeb.Bookmark do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias ExApi.User
+  alias ExApiWeb.User
 
   schema "bookmarks" do
     field :url, :string

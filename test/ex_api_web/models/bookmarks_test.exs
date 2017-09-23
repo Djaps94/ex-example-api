@@ -1,7 +1,7 @@
 defmodule ExApi.BookmarksTest do
   use ExApi.DataCase, async: true
 
-  alias ExApi.Bookmark
+  alias ExApiWeb.Bookmark
 
   @valid_attrs %{url: "http://www.coursera.org", description: "Description"}
   @invalid_attrs %{}
