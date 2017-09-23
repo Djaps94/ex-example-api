@@ -10,6 +10,7 @@ defmodule ExApi.User do
     field :name, :string
     field :email, :string
     field :password, :string
+    has_many :bookmarks, ExApi.Bookmark
 
     timestamps()
   end
