@@ -20,9 +20,8 @@ defmodule ExApiWeb.Router do
       resources "/bookmarks", BookmarkController, only: [:index,
                                                         :create,
                                                         :delete]
+      get("/bookmarks/search", BookmarkController, :search)
+      get("/bookmarks/check", BookmarkController, :check)
     end
-
-    get("/users/:user_id/bookmarks/search", BookmarkController, :search)
-    get("/users/:user_id/bookmarks/check", BookmarkController, :check)
   end
 end
