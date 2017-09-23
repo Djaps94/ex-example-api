@@ -16,5 +16,6 @@ defmodule ExApiWeb.Bookmark do
     changeset
     |> cast(params, [:url, :description])
     |> validate_required(:url)
+    |> assoc_constraint(:user)
   end
 end
