@@ -42,4 +42,33 @@ defmodule ExApiWeb.BookmarkController do
       end
     end
   end
+
+  def search(conn, %{"user_id" => user_id, "url" => url, "description" => desc}) do
+    case {url, desc} do
+      {nil, nil} ->
+        conn |> send_resp(:unprocessable_entity, "")
+      {url, desc} when desc in [nil, ""] ->
+        bookmarks =
+          (from b in Bookmark,
+           where: b.user_id == ^user_id
+                  and like(b.url, ^url))
+          |> Repo.all
+        render(conn, "search.json", %{bookmarks: bookmarks})
+      {url, desc} when url in [nil, ""] ->
+        bookmarks =
+          (from b in Bookmark,
+           where: b.user_id == ^user_id
+           and like(b.description, ^desc))
+          |> Repo.all
+        render(conn, "search.json", %{bookmarks: bookmarks})
+      {url, desc} ->
+        bookmarks =
+          (from b in Bookmark,
+           where: b.user_id == ^user_id
+           and like(b.description, ^desc)
+           and like(b.url, ^url))
+          |> Repo.all
+        render(conn, "search.json", %{bookmarks: bookmarks})
+    end
+  end
 end

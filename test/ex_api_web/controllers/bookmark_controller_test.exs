@@ -6,7 +6,7 @@ defmodule ExApiWeb.BookmarkControllerTest do
   alias ExApi.Repo
 
   @user %{name: "John", email: "doe@gmail.com", password: "pass"}
-  @bookmark %{url: "http://www.coursera.org", description: "Description"}
+  @bookmark %{url: "http://www.coursera.org", description: "Cool site"}
 
   setup do
     user = Repo.insert!(User.registration_changeset(%User{}, @user))
@@ -26,7 +26,7 @@ defmodule ExApiWeb.BookmarkControllerTest do
     |> json_response(200)
 
     expected = %{"data" => [
-        %{"url" => "http://www.coursera.org", "description" => "Description"},
+        %{"url" => "http://www.coursera.org", "description" => "Cool site"},
         %{"url" => "www.google.com", "description" => "Something cool"}
       ]}
 
@@ -41,7 +41,7 @@ defmodule ExApiWeb.BookmarkControllerTest do
       |> json_response(201)
 
     expected = %{"data" =>
-      %{"url" => "http://www.coursera.org", "description" => "Description"}}
+      %{"url" => "http://www.coursera.org", "description" => "Cool site"}}
 
     assert expected == response
     assert Repo.get_by(Bookmark, %{url: "http://www.coursera.org"})
@@ -67,5 +67,39 @@ defmodule ExApiWeb.BookmarkControllerTest do
     res = delete(conn, user_bookmark_path(conn, :delete, user.id, 1))
 
     assert response(res, 422)
+  end
+
+  test "searches bookmark by url", %{conn: conn, user: user} do
+    Repo.insert!(build_assoc(user, :bookmarks, @bookmark))
+    Repo.insert!(build_assoc(user, :bookmarks, %{url: "http://www.coursera.org",
+                                                 description: "Course site"}))
+    response =
+      get(conn,
+          user_bookmark_path(conn, :search, user.id),
+          %{url: "http://www.coursera.org", description: ""})
+      |> json_response(200)
+
+    expected = %{"data" => [
+      %{"url" => "http://www.coursera.org", "description" => "Cool site"},
+      %{"url" => "http://www.coursera.org", "description" => "Course site"}]}
+
+    assert expected == response
+  end
+
+  test "searches bookmark by description", %{conn: conn, user: user} do
+    Repo.insert!(build_assoc(user, :bookmarks, @bookmark))
+    Repo.insert!(build_assoc(user, :bookmarks, %{url: "http://www.ign.com",
+                                                 description: "Cool site"}))
+    response =
+      get(conn,
+          user_bookmark_path(conn, :search, user.id),
+          %{url: "", description: "Cool site"})
+      |> json_response(200)
+
+    expected = %{"data" => [
+      %{"url" => "http://www.coursera.org", "description" => "Cool site"},
+      %{"url" => "http://www.ign.com", "description" => "Cool site"}]}
+
+    assert expected == response
   end
 end
