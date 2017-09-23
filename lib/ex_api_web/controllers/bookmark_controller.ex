@@ -71,4 +71,12 @@ defmodule ExApiWeb.BookmarkController do
         render(conn, "search.json", %{bookmarks: bookmarks})
     end
   end
+
+  def check(conn, %{"user_id" => _user_id, "id" => id}) do
+    bookmark = Repo.get!(Bookmark, id)
+    res =
+      Enum.filter(String.graphemes(bookmark.url), fn letter -> letter == <<97>> end)
+    |> Enum.count
+    render(conn, "check.json", %{nums: res})
+  end
 end

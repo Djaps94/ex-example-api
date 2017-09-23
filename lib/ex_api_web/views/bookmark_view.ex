@@ -13,6 +13,10 @@ defmodule ExApiWeb.BookmarkView do
     %{data: render_many(bookmarks, ExApiWeb.BookmarkView, "bookmark.json")}
   end
 
+  def render("check.json", %{nums: nums}) do
+    %{data: %{letter: nums}}
+  end
+
   def render("bookmark.json", %{bookmark: bookmark}) do
     %{url: bookmark.url, description: bookmark.description}
   end

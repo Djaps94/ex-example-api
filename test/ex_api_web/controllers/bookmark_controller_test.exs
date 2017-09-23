@@ -98,8 +98,25 @@ defmodule ExApiWeb.BookmarkControllerTest do
 
     expected = %{"data" => [
       %{"url" => "http://www.coursera.org", "description" => "Cool site"},
-      %{"url" => "http://www.ign.com", "description" => "Cool site"}]}
+      %{"url" => "http://www.ign.com", "description" => "Cool site"}
+    ]}
 
     assert expected == response
+  end
+
+  test "checks how many 'a' letter there are in url", %{conn: conn, user: user} do
+    bookmark = Repo.insert!(build_assoc(user, :bookmarks, @bookmark))
+    another_bookmark =
+      Repo.insert!(build_assoc(user, :bookmarks, %{url: "www.blablablaaa.com",
+                                                   description: "Hehe"}))
+    response =
+      get(conn, user_bookmark_path(conn, :check, user.id, bookmark.id))
+      |> json_response(200)
+    another_response =
+      get(conn, user_bookmark_path(conn, :check, user.id, another_bookmark.id))
+      |> json_response(200)
+
+    assert response["data"]["letter"] == 1
+    assert another_response["data"]["letter"] == 5
   end
 end

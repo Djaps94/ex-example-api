@@ -18,10 +18,10 @@ defmodule ExApiWeb.Router do
 
     resources "/users", UserController, only: [:index, :create] do
       resources "/bookmarks", BookmarkController, only: [:index,
-                                                        :create,
-                                                        :delete]
+                                                         :create,
+                                                         :delete]
       get("/bookmarks/search", BookmarkController, :search)
-      get("/bookmarks/check", BookmarkController, :check)
+      get("/bookmarks/check/:id", BookmarkController, :check)
     end
   end
 end
