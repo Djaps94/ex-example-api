@@ -10,7 +10,7 @@ defmodule ExApiWeb.UserController do
 
   def create(conn, %{"user" => params}) do
     user_params =
-      case !Map.has_key?(params, "password") do
+      case !Map.has_key?(params, "password") || params["password"] == "" do
         true ->  params |> generate_password(20)
         false -> params
       end

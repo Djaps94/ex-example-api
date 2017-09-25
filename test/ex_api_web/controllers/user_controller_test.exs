@@ -6,6 +6,7 @@ defmodule ExApiWeb.UserControllerTest do
 
   @user %{name: "John", email: "doe@gmail.com", password: "pass"}
   @user_without_pass %{name: "John", email: "doe@gmail.com"}
+  @user_with_empty_pass %{name: "John", email: "doe@gmail.com", password: ""}
 
   setup do
     conn =
@@ -46,8 +47,17 @@ defmodule ExApiWeb.UserControllerTest do
   end
 
   test "creates and renders user when password is not suplied", %{conn: conn} do
-    response = post(conn, user_path(conn, :create), user: @user_without_pass)
-               |> json_response(201)
+    response =
+      post(conn, user_path(conn, :create), user: @user_without_pass)
+      |> json_response(201)
+
+    assert response["data"]["password"]
+  end
+
+  test "creates and renders user when password is empty string", %{conn: conn} do
+    response =
+      post(conn, user_path(conn, :create), user: @user_with_empty_pass)
+      |> json_response(201)
 
     assert response["data"]["password"]
   end
