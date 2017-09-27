@@ -2,7 +2,7 @@ defmodule ExApiWeb.BookmarkController do
   use ExApiWeb, :controller
   import Ecto.Query
 
-  alias ExApiWeb.{Bookmark, UserBookmark}
+  alias ExApiWeb.{User, Bookmark, UserBookmark}
 
   def index(conn, %{"user_id" => user_id}) do
     bookmark_ids =
@@ -58,14 +58,14 @@ defmodule ExApiWeb.BookmarkController do
       {url, desc} when desc in [nil, ""] ->
         bookmarks =
           (from b in Bookmark,
-           where: b.user_id == ^user_id
-                  and like(b.url, ^url))
+           where: b.id in ^bookmark_query(user_id)
+           and like(b.url, ^url))
           |> Repo.all
         render(conn, "search.json", %{bookmarks: bookmarks})
       {url, desc} when url in [nil, ""] ->
         bookmarks =
           (from b in Bookmark,
-           where: b.user_id == ^user_id
+           where: b.id in ^bookmark_query(user_id)
            and like(b.description, ^desc))
           |> Repo.all
         render(conn, "search.json", %{bookmarks: bookmarks})
@@ -89,6 +89,14 @@ defmodule ExApiWeb.BookmarkController do
   end
 
   def copy(conn, %{"user_id" => user_id, "id" => id}) do
+    try do
+        Repo.get!(User, user_id)
+        Repo.get!(Bookmark, id)
+      rescue
+        NoResultsError ->
+          conn
+          |> send_resp(:unprocessable_entity, "")
+    end
     ub = UserBookmark.changeset(%UserBookmark{},
                                 %{user_id: user_id, bookmark_id: id}
                                )
@@ -101,5 +109,12 @@ defmodule ExApiWeb.BookmarkController do
         |> put_status(:unprocessable_entity)
         |> render(ExApiWeb.ChangesetView, "error.json", changeset: changeset)
     end
+  end
+
+  defp bookmark_query(user_id) do
+    (from ub in UserBookmark,
+     where: ub.user_id == ^user_id,
+     select: ub.bookmark_id)
+    |> Repo.all
   end
 end

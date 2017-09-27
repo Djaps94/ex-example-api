@@ -64,8 +64,8 @@ defmodule ExApiWeb.BookmarkControllerTest do
 
   test "deletes bookmark", %{conn: conn, user: user} do
     bm = Repo.insert!(Bookmark.changeset(%Bookmark{}, @bookmark))
-    user_bookmarks = Repo.insert!(UserBookmark.changeset(%UserBookmark{},
-                                  %{user_id: user.id, bookmark_id: bm.id}))
+    Repo.insert(UserBookmark.changeset(%UserBookmark{},
+                                       %{user_id: user.id, bookmark_id: bm.id}))
 
     res = delete(conn, user_bookmark_path(conn, :delete, user.id, bm.id))
 
@@ -81,9 +81,16 @@ defmodule ExApiWeb.BookmarkControllerTest do
   end
 
   test "searches bookmark by url", %{conn: conn, user: user} do
-    Repo.insert!(build_assoc(user, :bookmarks, @bookmark))
-    Repo.insert!(build_assoc(user, :bookmarks, %{url: "http://www.coursera.org",
-                                                 description: "Course site"}))
+    bm_one = Repo.insert!(Bookmark.changeset(%Bookmark{}, @bookmark))
+    bm_two = Repo.insert!(Bookmark.changeset(%Bookmark{}, %{url: "http://www.coursera.org",
+                                                          description: "Course site"}))
+
+    user_bookmarks = [UserBookmark.changeset(%UserBookmark{},
+                                             %{user_id: user.id, bookmark_id: bm_one.id}),
+                      UserBookmark.changeset(%UserBookmark{},
+                                             %{user_id: user.id, bookmark_id: bm_two.id})
+                     ]
+    Enum.each(user_bookmarks, &Repo.insert(&1))
     response =
       get(conn,
           user_bookmark_path(conn, :search, user.id),
@@ -98,9 +105,16 @@ defmodule ExApiWeb.BookmarkControllerTest do
   end
 
   test "searches bookmark by description", %{conn: conn, user: user} do
-    Repo.insert!(build_assoc(user, :bookmarks, @bookmark))
-    Repo.insert!(build_assoc(user, :bookmarks, %{url: "http://www.ign.com",
-                                                 description: "Cool site"}))
+    bm_one = Repo.insert!(build_assoc(user, :bookmarks, @bookmark))
+    bm_two = Repo.insert!(build_assoc(user, :bookmarks, %{url: "http://www.ign.com",
+                                                          description: "Cool site"}))
+
+    user_bookmarks = [UserBookmark.changeset(%UserBookmark{},
+                                         %{user_id: user.id, bookmark_id: bm_one.id}),
+                      UserBookmark.changeset(%UserBookmark{},
+                                         %{user_id: user.id, bookmark_id: bm_two.id})
+                     ]
+    Enum.each(user_bookmarks, &Repo.insert(&1))
     response =
       get(conn,
           user_bookmark_path(conn, :search, user.id),
@@ -131,7 +145,7 @@ defmodule ExApiWeb.BookmarkControllerTest do
     assert another_response["data"]["letter"] == 5
   end
 
-  test "gives copied bookmark to user", %{conn: conn, user: user} do
+  test "gives copied bookmark to user", %{conn: conn, user: _user} do
     bookmark = Repo.insert!(Bookmark.changeset(%Bookmark{}, @bookmark))
     u = User.registration_changeset(%User{}, %{name: "Jane",
                                                email: "janedoe@gmail.com",
