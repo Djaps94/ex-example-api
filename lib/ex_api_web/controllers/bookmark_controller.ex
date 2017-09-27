@@ -2,12 +2,12 @@ defmodule ExApiWeb.BookmarkController do
   use ExApiWeb, :controller
   import Ecto.Query
 
-  alias ExApiWeb.Bookmark
+  alias ExApiWeb.{Bookmark, UserBookmark}
 
   def index(conn, %{"user_id" => user_id}) do
     bookmark_ids =
-      (from b in "user_bookmarks",
-       where: b.user_id == type(^user_id, :id),
+      (from b in UserBookmark,
+       where: b.user_id == ^user_id,
        select: b.bookmark_id)
       |> Repo.all
 

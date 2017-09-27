@@ -2,7 +2,7 @@ defmodule ExApiWeb.BookmarkControllerTest do
   use ExApiWeb.ConnCase
   import Ecto
 
-  alias ExApiWeb.{Bookmark, User}
+  alias ExApiWeb.{Bookmark, User, UserBookmark}
   alias ExApi.Repo
 
   @user %{name: "John", email: "doe@gmail.com", password: "pass"}
@@ -21,12 +21,12 @@ defmodule ExApiWeb.BookmarkControllerTest do
     bookmark_two = Repo.insert!(Bookmark.changeset(%Bookmark{}, %{url: "www.google.com",
                                                                   description: "Something cool"}))
 
-    u = Repo.get!(User, user.id)
-    u
-    |> Repo.preload(:bookmarks)
-    |> Ecto.Changeset.change()
-    |> Ecto.Changeset.put_assoc(:bookmarks, [bookmark_one, bookmark_two])
-    |> Repo.update!
+    user_bookmarks = [UserBookmark.changeset(%UserBookmark{},
+                                             %{user_id: user.id, bookmark_id: bookmark_one.id}),
+                      UserBookmark.changeset(%UserBookmark{},
+                                             %{user_id: user.id, bookmark_id: bookmark_two.id})
+                     ]
+    Enum.each(user_bookmarks, &Repo.insert!(&1))
 
     response = get(conn, user_bookmark_path(conn, :index, user.id))
     |> json_response(200)
