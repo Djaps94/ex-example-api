@@ -18,9 +18,11 @@ defmodule ExApiWeb.BookmarkController do
     render(conn, "index.json", %{bookmarks: bookmarks})
   end
 
-  def create(conn, %{"bookmark" => params}) do
+  def create(conn, %{"user_id" => id, "bookmark" => params}) do
     case Repo.insert(Bookmark.changeset(%Bookmark{}, params)) do
       {:ok, bookmark} ->
+        Repo.insert(UserBookmark.changeset(%UserBookmark{},
+                                           %{user_id: id, bookmark_id: bookmark.id}))
         conn
         |> put_status(:created)
         |> render("create.json", %{bookmark: bookmark})
@@ -87,22 +89,17 @@ defmodule ExApiWeb.BookmarkController do
   end
 
   def copy(conn, %{"user_id" => user_id, "id" => id}) do
-    try do
-      user = Repo.get!(User, user_id)
-      bookmark = Repo.get!(Bookmark, id)
-
-      user
-      |> Repo.preload(:bookmarks)
-      |> Ecto.Changeset.change()
-      |> Ecto.Changeset.put_assoc(:bookmarks, bookmark)
-      |> Repo.update!
-
-      conn
-      |> put_status(:created)
-      |> render("create.json", %{bookmark: bookmark})
-    rescue
-      NoResultError ->
-        conn |> send_resp(:unprocessable_entity, "")
+    ub = UserBookmark.changeset(%UserBookmark{},
+                                %{user_id: user_id, bookmark_id: id}
+                               )
+    case Repo.insert(ub) do
+      {:ok, _user_bookmark} ->
+        conn
+        |> send_resp(:no_content, "")
+      {:error, changeset} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> render(ExApiWeb.ChangesetView, "error.json", changeset: changeset)
     end
   end
 end

@@ -51,6 +51,7 @@ defmodule ExApiWeb.BookmarkControllerTest do
 
     assert expected == response
     assert Repo.get_by(Bookmark, %{url: "http://www.coursera.org"})
+    assert Repo.get_by(UserBookmark, %{user_id: user.id})
   end
 
   test "doesn't create bookmark when data is invalid", %{conn: conn, user: user} do
@@ -62,11 +63,15 @@ defmodule ExApiWeb.BookmarkControllerTest do
   end
 
   test "deletes bookmark", %{conn: conn, user: user} do
-    bm = Repo.insert!(build_assoc(user, :bookmarks, @bookmark))
+    bm = Repo.insert!(Bookmark.changeset(%Bookmark{}, @bookmark))
+    user_bookmarks = Repo.insert!(UserBookmark.changeset(%UserBookmark{},
+                                  %{user_id: user.id, bookmark_id: bm.id}))
+
     res = delete(conn, user_bookmark_path(conn, :delete, user.id, bm.id))
 
     assert response(res, 204)
     refute Repo.get(Bookmark, bm.id)
+    refute Repo.get_by(UserBookmark, %{bookmark_id: bm.id})
   end
 
   test "tries to delete bookmark that doesn't exist", %{conn: conn, user: user} do
@@ -127,17 +132,17 @@ defmodule ExApiWeb.BookmarkControllerTest do
   end
 
   test "gives copied bookmark to user", %{conn: conn, user: user} do
-    bookmark = Repo.insert!(build_assoc(user, :bookmarks, @bookmark))
+    bookmark = Repo.insert!(Bookmark.changeset(%Bookmark{}, @bookmark))
     u = User.registration_changeset(%User{}, %{name: "Jane",
                                                email: "janedoe@gmail.com",
                                                password: "janedoe"})
 
     new_user = Repo.insert!(u)
-    response =
-      post(conn, user_bookmark_path(conn, :copy, new_user.id, bookmark.id))
-      |> json_response(201)
+    res = post(conn, user_bookmark_path(conn, :copy, new_user.id, bookmark.id))
     new_user |> Repo.preload(:bookmarks)
 
+    assert response(res, 204)
     assert new_user.bookmarks
+    assert Repo.get_by(UserBookmark, %{user_id: new_user.id, bookmark_id: bookmark.id})
   end
 end

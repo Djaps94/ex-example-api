@@ -12,7 +12,7 @@ defmodule ExApiWeb.User do
     field :name, :string
     field :email, :string
     field :password, :string
-    many_to_many :bookmarks, Bookmark, join_through: UserBookmark
+    many_to_many :bookmarks, Bookmark, join_through: UserBookmark, on_delete: :delete_all
 
     timestamps()
   end

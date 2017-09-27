@@ -7,7 +7,7 @@ defmodule ExApiWeb.Bookmark do
   schema "bookmarks" do
     field :url, :string
     field :description, :string
-    many_to_many :users, User, join_through: UserBookmark
+    many_to_many :users, User, join_through: UserBookmark, on_delete: :delete_all
 
     timestamps()
   end
