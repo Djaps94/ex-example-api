@@ -6,11 +6,13 @@ defmodule ExApiWeb.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias ExApiWeb.Bookmark
+
   schema "users" do
     field :name, :string
     field :email, :string
     field :password, :string
-    has_many :bookmarks, ExApiWeb.Bookmark
+    many_to_many :bookmarks, Bookmark, join_through: "user_bookmarks"
 
     timestamps()
   end

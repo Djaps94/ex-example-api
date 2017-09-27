@@ -17,11 +17,17 @@ defmodule ExApiWeb.BookmarkControllerTest do
 
   test "returns all user bookmarks", %{conn: conn, user: user} do
 
-    bookmark_one = build_assoc(user, :bookmarks, @bookmark)
-    bookmark_two = build_assoc(user, :bookmarks, %{url: "www.google.com",
-                                                  description: "Something cool"})
-    Repo.insert!(bookmark_one)
-    Repo.insert!(bookmark_two)
+    bookmark_one = Repo.insert!(Bookmark.changeset(%Bookmark{}, @bookmark))
+    bookmark_two = Repo.insert!(Bookmark.changeset(%Bookmark{}, %{url: "www.google.com",
+                                                                  description: "Something cool"}))
+
+    u = Repo.get!(User, user.id)
+    u
+    |> Repo.preload(:bookmarks)
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.put_assoc(:bookmarks, [bookmark_one, bookmark_two])
+    |> Repo.update!
+
     response = get(conn, user_bookmark_path(conn, :index, user.id))
     |> json_response(200)
 
@@ -104,7 +110,7 @@ defmodule ExApiWeb.BookmarkControllerTest do
     assert expected == response
   end
 
-  test "checks how many 'a' letter there are in url", %{conn: conn, user: user} do
+  test "checks how many 'a' letter there are in urls", %{conn: conn, user: user} do
     bookmark = Repo.insert!(build_assoc(user, :bookmarks, @bookmark))
     another_bookmark =
       Repo.insert!(build_assoc(user, :bookmarks, %{url: "www.blablablaaa.com",
@@ -118,5 +124,20 @@ defmodule ExApiWeb.BookmarkControllerTest do
 
     assert response["data"]["letter"] == 1
     assert another_response["data"]["letter"] == 5
+  end
+
+  test "gives copied bookmark to user", %{conn: conn, user: user} do
+    bookmark = Repo.insert!(build_assoc(user, :bookmarks, @bookmark))
+    u = User.registration_changeset(%User{}, %{name: "Jane",
+                                               email: "janedoe@gmail.com",
+                                               password: "janedoe"})
+
+    new_user = Repo.insert!(u)
+    response =
+      post(conn, user_bookmark_path(conn, :copy, new_user.id, bookmark.id))
+      |> json_response(201)
+    new_user |> Repo.preload(:bookmarks)
+
+    assert new_user.bookmarks
   end
 end

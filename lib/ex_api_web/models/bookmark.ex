@@ -7,7 +7,7 @@ defmodule ExApiWeb.Bookmark do
   schema "bookmarks" do
     field :url, :string
     field :description, :string
-    belongs_to :user, User
+    many_to_many :users, User, join_through: "user_bookmarks"
 
     timestamps()
   end
@@ -16,6 +16,5 @@ defmodule ExApiWeb.Bookmark do
     changeset
     |> cast(params, [:url, :description])
     |> validate_required(:url)
-    |> assoc_constraint(:user)
   end
 end

@@ -5,9 +5,15 @@ defmodule ExApiWeb.BookmarkController do
   alias ExApiWeb.Bookmark
 
   def index(conn, %{"user_id" => user_id}) do
+    bookmark_ids =
+      (from b in "user_bookmarks",
+       where: b.user_id == type(^user_id, :id),
+       select: b.bookmark_id)
+      |> Repo.all
+
     bookmarks =
-      (from b in Bookmark,
-      where: b.user_id == ^user_id)
+      (from bookmark in Bookmark,
+      where: bookmark.id in ^bookmark_ids)
       |> Repo.all
     render(conn, "index.json", %{bookmarks: bookmarks})
   end
@@ -78,5 +84,25 @@ defmodule ExApiWeb.BookmarkController do
       Enum.filter(String.graphemes(bookmark.url), fn letter -> letter == <<97>> end)
     |> Enum.count
     render(conn, "check.json", %{nums: res})
+  end
+
+  def copy(conn, %{"user_id" => user_id, "id" => id}) do
+    try do
+      user = Repo.get!(User, user_id)
+      bookmark = Repo.get!(Bookmark, id)
+
+      user
+      |> Repo.preload(:bookmarks)
+      |> Ecto.Changeset.change()
+      |> Ecto.Changeset.put_assoc(:bookmarks, bookmark)
+      |> Repo.update!
+
+      conn
+      |> put_status(:created)
+      |> render("create.json", %{bookmark: bookmark})
+    rescue
+      NoResultError ->
+        conn |> send_resp(:unprocessable_entity, "")
+    end
   end
 end
