@@ -17,14 +17,14 @@ defmodule ExApiWeb.BookmarkControllerTest do
 
   test "returns all user bookmarks", %{conn: conn, user: user} do
 
-    bookmark_one = Repo.insert!(Bookmark.changeset(%Bookmark{}, @bookmark))
-    bookmark_two = Repo.insert!(Bookmark.changeset(%Bookmark{}, %{url: "www.google.com",
+    bm_one = Repo.insert!(Bookmark.changeset(%Bookmark{}, @bookmark))
+    bm_two = Repo.insert!(Bookmark.changeset(%Bookmark{}, %{url: "www.google.com",
                                                                   description: "Something cool"}))
 
     user_bookmarks = [UserBookmark.changeset(%UserBookmark{},
-                                             %{user_id: user.id, bookmark_id: bookmark_one.id}),
+                                             %{user_id: user.id, bookmark_id: bm_one.id}),
                       UserBookmark.changeset(%UserBookmark{},
-                                             %{user_id: user.id, bookmark_id: bookmark_two.id})
+                                             %{user_id: user.id, bookmark_id: bm_two.id})
                      ]
     Enum.each(user_bookmarks, &Repo.insert!(&1))
 
@@ -32,8 +32,8 @@ defmodule ExApiWeb.BookmarkControllerTest do
     |> json_response(200)
 
     expected = %{"data" => [
-        %{"url" => "http://www.coursera.org", "description" => "Cool site"},
-        %{"url" => "www.google.com", "description" => "Something cool"}
+        %{"id" => bm_one.id, "url" => "http://www.coursera.org", "description" => "Cool site"},
+        %{"id" => bm_two.id, "url" => "www.google.com", "description" => "Something cool"}
       ]}
 
     assert expected == response
@@ -46,10 +46,9 @@ defmodule ExApiWeb.BookmarkControllerTest do
       post(conn, user_bookmark_path(conn, :create, user.id), bookmark: bookmark)
       |> json_response(201)
 
-    expected = %{"data" =>
-      %{"url" => "http://www.coursera.org", "description" => "Cool site"}}
+    expected = %{"url" => "http://www.coursera.org", "description" => "Cool site"}
 
-    assert expected == response
+    assert expected == Map.delete(response["data"], "id")
     assert Repo.get_by(Bookmark, %{url: "http://www.coursera.org"})
     assert Repo.get_by(UserBookmark, %{user_id: user.id})
   end
@@ -98,8 +97,8 @@ defmodule ExApiWeb.BookmarkControllerTest do
       |> json_response(200)
 
     expected = %{"data" => [
-      %{"url" => "http://www.coursera.org", "description" => "Cool site"},
-      %{"url" => "http://www.coursera.org", "description" => "Course site"}]}
+      %{"id" => bm_one.id, "url" => "http://www.coursera.org", "description" => "Cool site"},
+      %{"id" => bm_two.id, "url" => "http://www.coursera.org", "description" => "Course site"}]}
 
     assert expected == response
   end
@@ -122,8 +121,8 @@ defmodule ExApiWeb.BookmarkControllerTest do
       |> json_response(200)
 
     expected = %{"data" => [
-      %{"url" => "http://www.coursera.org", "description" => "Cool site"},
-      %{"url" => "http://www.ign.com", "description" => "Cool site"}
+      %{"id" => bm_one.id, "url" => "http://www.coursera.org", "description" => "Cool site"},
+      %{"id" => bm_two.id, "url" => "http://www.ign.com", "description" => "Cool site"}
     ]}
 
     assert expected == response
