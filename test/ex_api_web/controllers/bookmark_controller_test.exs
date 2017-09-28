@@ -158,4 +158,15 @@ defmodule ExApiWeb.BookmarkControllerTest do
     assert new_user.bookmarks
     assert Repo.get_by(UserBookmark, %{user_id: new_user.id, bookmark_id: bookmark.id})
   end
+
+  test "attaches photo to bookmark", %{conn: conn, user: user} do
+    bm = Repo.insert!(Bookmark.changeset(%Bookmark{}, @bookmark))
+    Repo.insert(UserBookmark.changeset(%UserBookmark{}, %{user_id: user.id, bookmark_id: bm.id}))
+    upload = %Plug.Upload{path: "test/ex_api_web/fixtures/elixir.png", filename: "elixir.png"}
+    response =
+      put(conn, user_bookmark_path(conn, :attach, user.id, bm.id), image: upload)
+      |> json_response(200)
+
+    assert response["data"]["image"]
+  end
 end

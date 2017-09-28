@@ -111,6 +111,21 @@ defmodule ExApiWeb.BookmarkController do
     end
   end
 
+  def attach(conn, %{"user_id" => _user_id, "id" => id, "image" => upload}) do
+    bookmark = Repo.get!(Bookmark, id)
+    update_bm = Bookmark.changeset(bookmark, %{image: upload})
+    IO.inspect update_bm
+    case Repo.update(update_bm) do
+      {:ok, struct} ->
+        conn
+        |> put_status(:ok)
+        |> render("upload.json", %{bookmark: struct})
+      {:error, changeset} ->
+        conn
+        |> render(ExApiWeb.ChangesetView, "error.json", %{changeset: changeset})
+    end
+  end
+
   defp bookmark_query(user_id) do
     (from ub in UserBookmark,
      where: ub.user_id == ^user_id,

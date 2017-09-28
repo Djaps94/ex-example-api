@@ -27,6 +27,7 @@ defmodule ExApiWeb.Router do
       get("/bookmarks/search", BookmarkController, :search)
       get("/bookmarks/check/:id", BookmarkController, :check)
       post("/bookmarks/copy/:id", BookmarkController, :copy)
+      put("/bookmarks/attach/:id", BookmarkController, :attach)
     end
     post("/users/:user_id/send/:bookmark_id", UserController, :send)
   end
