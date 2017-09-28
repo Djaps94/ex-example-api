@@ -20,7 +20,7 @@ defmodule ExApi.Mixfile do
   def application do
     [
       mod: {ExApi.Application, []},
-      extra_applications: [:logger, :runtime_tools, :bamboo]
+      extra_applications: [:logger, :runtime_tools, :bamboo, :arc_ecto]
     ]
   end
 
@@ -42,6 +42,7 @@ defmodule ExApi.Mixfile do
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
       {:bamboo, "~> 0.8"},
+      {:arc_ecto, "~>0.7.0"}
     ]
   end
 
