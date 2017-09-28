@@ -17,6 +17,7 @@ defmodule ExApiWeb.Router do
     pipe_through :api
 
     resources "/users", UserController, only: [:index, :create] do
+      post("/send/:bookmark_id", UserController, :send)
       resources "/bookmarks", BookmarkController, only: [:index,
                                                          :create,
                                                          :delete]
