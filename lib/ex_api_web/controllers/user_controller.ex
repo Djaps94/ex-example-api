@@ -33,10 +33,12 @@ defmodule ExApiWeb.UserController do
       user = Repo.get!(User, user_id)
       bookmark = Repo.get!(Bookmark, bookmark_id)
       Email.compose_email(user, bookmark) |> ExApi.Mailer.deliver_later
-      conn |> send_resp(:ok, "")
+      conn
+      |> send_resp(:ok, "")
       rescue
-        NoResultsError ->
-          conn |> render("404.html", %{user_id: user_id, bookmark_id: bookmark_id})
+        Ecto.NoResultsError ->
+          conn
+          |> send_resp(:not_found, "")
     end
   end
 

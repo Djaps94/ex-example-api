@@ -16,19 +16,21 @@ defmodule ExApiWeb.UserControllerTest do
   end
 
   test "returns all users", %{conn: conn} do
-    users = [ User.registration_changeset(%User{}, %{name: "John",
-                                                     email: "doe@gmail.com",
-                                                     password: "doedoe"}),
-              User.registration_changeset(%User{}, %{name: "Jane",
-                                                     email: "jane@gmail.com",
-                                                     password: "janedoe"})]
-    Enum.each(users, &Repo.insert!(&1))
+    user_one = User.registration_changeset(%User{}, %{name: "John",
+                                                      email: "doe@gmail.com",
+                                                      password: "doedoe"})
+    user_two = User.registration_changeset(%User{}, %{name: "Jane",
+                                                      email: "jane@gmail.com",
+                                                      password: "janedoe"})
+
+    id_one = Repo.insert!(user_one) |> Map.get(:id)
+    id_two = Repo.insert!(user_two) |> Map.get(:id)
     response = get(conn, user_path(conn, :index)) |> json_response(200)
 
     expected = %{
       "data" => [
-        %{"name" => "John", "email" => "doe@gmail.com", "password" => "doedoe"},
-        %{"name" => "Jane", "email" => "jane@gmail.com", "password" => "janedoe"}
+        %{"id" => id_one, "name" => "John", "email" => "doe@gmail.com", "password" => "doedoe"},
+        %{"id" => id_two, "name" => "Jane", "email" => "jane@gmail.com", "password" => "janedoe"}
       ]
     }
 
@@ -39,11 +41,9 @@ defmodule ExApiWeb.UserControllerTest do
     response = post(conn, user_path(conn, :create), user: @user)
                |> json_response(201)
 
-    expected = %{
-      "data" => %{"name" => "John", "email" => "doe@gmail.com", "password" => "pass"}
-    }
+    expected = %{"name" => "John", "email" => "doe@gmail.com", "password" => "pass"}
 
-    assert expected == response
+    assert expected == Map.delete(response["data"], "id")
     assert Repo.get_by(User, %{name: "John"})
   end
 
@@ -79,5 +79,11 @@ defmodule ExApiWeb.UserControllerTest do
 
     assert response(res, 200)
     assert_delivered_email Email.compose_email(user, bookmark)
+  end
+
+  test "tries to send mail to non existing user", %{conn: conn} do
+    res = post(conn, user_path(conn, :send, 0, 0))
+
+    assert response(res, 404)
   end
 end
