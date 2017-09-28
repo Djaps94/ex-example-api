@@ -1,8 +1,8 @@
 defmodule ExApiWeb.ErrorView do
   use ExApiWeb, :view
 
-  def render("404.html", _assigns) do
-    "Page not found"
+  def render("404.html", %{user: user_id, bm: bookmark_id}) do
+    "User or bookmark with ids #{user_id}, #{bookmark_id} are not available"
   end
 
   def render("500.html", _assigns) do

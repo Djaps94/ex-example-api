@@ -1,7 +1,7 @@
 defmodule ExApiWeb.UserController do
   use ExApiWeb, :controller
 
-  alias ExApiWeb.User
+  alias ExApiWeb.{User, Bookmark, Email}
 
   def index(conn, _params) do
     users = Repo.all(User)
@@ -25,6 +25,18 @@ defmodule ExApiWeb.UserController do
         conn
         |> put_status(:unprocessable_entity)
         |> render(ExApiWeb.ChangesetView, "error.json", changeset: changeset)
+    end
+  end
+
+  def send(conn, %{"user_id" => user_id, "bookmark_id" => bookmark_id}) do
+    try do
+      user = Repo.get!(User, user_id)
+      bookmark = Repo.get!(Bookmark, bookmark_id)
+      Email.compose_email(user, bookmark) |> ExApi.Mailer.deliver_later
+      conn |> send_resp(:ok, "")
+      rescue
+        NoResultsError ->
+          conn |> render("404.html", %{user_id: user_id, bookmark_id: bookmark_id})
     end
   end
 

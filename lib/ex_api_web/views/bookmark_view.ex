@@ -18,6 +18,6 @@ defmodule ExApiWeb.BookmarkView do
   end
 
   def render("bookmark.json", %{bookmark: bookmark}) do
-    %{url: bookmark.url, description: bookmark.description}
+    %{id: bookmark.id, url: bookmark.url, description: bookmark.description}
   end
 end

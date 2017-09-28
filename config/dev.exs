@@ -56,3 +56,6 @@ config :ex_api, ExApi.Repo,
   database: "ex_api_dev",
   hostname: "localhost",
   pool_size: 10
+
+config :ex_api, ExApi.Mailer,
+  adapter: Bamboo.LocalAdapter

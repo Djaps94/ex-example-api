@@ -95,7 +95,7 @@ defmodule ExApiWeb.BookmarkController do
       rescue
         NoResultsError ->
           conn
-          |> send_resp(:unprocessable_entity, "")
+          |> send_resp(:not_found, "")
     end
     ub = UserBookmark.changeset(%UserBookmark{},
                                 %{user_id: user_id, bookmark_id: id}

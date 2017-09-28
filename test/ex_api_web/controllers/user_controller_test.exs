@@ -1,7 +1,8 @@
 defmodule ExApiWeb.UserControllerTest do
   use ExApiWeb.ConnCase
+  use Bamboo.Test
 
-  alias ExApiWeb.User
+  alias ExApiWeb.{User, Bookmark, Email}
   alias ExApi.Repo
 
   @user %{name: "John", email: "doe@gmail.com", password: "pass"}
@@ -66,5 +67,17 @@ defmodule ExApiWeb.UserControllerTest do
     response = post(conn, user_path(conn, :create), user: %{}) |> json_response(422)
 
     assert response["errors"] != %{}
+  end
+
+  test "sending email with bookmark data", %{conn: conn} do
+    user = Repo.insert!(User.registration_changeset(%User{}, @user))
+    bookmark = Repo.insert!(Bookmark.changeset(%Bookmark{},
+                                               %{url: "www.google.com",
+                                                 description: "Wow, so much wow"
+                                                }))
+    res = post(conn, user_path(conn, :send, user.id, bookmark.id))
+
+    assert response(res, 200)
+    assert_delivered_email Email.compose_email(user, bookmark)
   end
 end

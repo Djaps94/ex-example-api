@@ -13,11 +13,14 @@ defmodule ExApiWeb.Router do
     plug :accepts, ["json"]
   end
 
+  if Mix.env == :dev do
+      forward("/send_mails", Bamboo.EmailPreviewPlug)
+  end
+
   scope "/api", ExApiWeb do
     pipe_through :api
 
     resources "/users", UserController, only: [:index, :create] do
-      post("/send/:bookmark_id", UserController, :send)
       resources "/bookmarks", BookmarkController, only: [:index,
                                                          :create,
                                                          :delete]
@@ -25,5 +28,6 @@ defmodule ExApiWeb.Router do
       get("/bookmarks/check/:id", BookmarkController, :check)
       post("/bookmarks/copy/:id", BookmarkController, :copy)
     end
+    post("/users/:user_id/send/:bookmark_id", UserController, :send)
   end
 end

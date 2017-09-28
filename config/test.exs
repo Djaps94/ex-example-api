@@ -9,6 +9,10 @@ config :ex_api, ExApiWeb.Endpoint,
 # Print only warnings and errors during test
 config :logger, level: :warn
 
+#Configure mailer
+config :ex_api, ExApi.Mailer,
+  adapter: Bamboo.TestAdapter
+
 # Configure your database
 config :ex_api, ExApi.Repo,
   adapter: Ecto.Adapters.Postgres,
