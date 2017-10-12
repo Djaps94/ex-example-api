@@ -8,6 +8,7 @@ defmodule ExApi.Application do
     children = [
       supervisor(ExApi.Repo, []),
       supervisor(ExApiWeb.Endpoint, []),
+      supervisor(Task.Supervisor, [[name: EmailSupervisor]])
     ]
 
     opts = [strategy: :one_for_one, name: ExApi.Supervisor]

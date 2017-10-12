@@ -32,7 +32,14 @@ defmodule ExApiWeb.UserController do
     try do
       user = Repo.get!(User, user_id)
       bookmark = Repo.get!(Bookmark, bookmark_id)
-      Email.compose_email(user, bookmark) |> ExApi.Mailer.deliver_later
+      spawn(fn() ->
+        Task.Supervisor.start_child(EmailSupervisor, fn() ->
+            IO.puts "U novom threadu sam"
+            Email.compose_email(user, bookmark) 
+            |> ExApi.Mailer.deliver_later
+        end)
+      end)
+      IO.puts "Nastavio sam dalje"
       conn
       |> send_resp(:ok, "")
       rescue
@@ -43,7 +50,9 @@ defmodule ExApiWeb.UserController do
   end
 
   defp generate_password(params, length) do
-    pass = :crypto.strong_rand_bytes(length) |> Base.encode64 |> binary_part(0, length)
+    pass = :crypto.strong_rand_bytes(length) 
+           |> Base.encode64 
+           |> binary_part(0, length)
     Map.put(params, "password", pass)
   end
 end

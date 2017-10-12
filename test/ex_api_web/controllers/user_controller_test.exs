@@ -1,6 +1,6 @@
 defmodule ExApiWeb.UserControllerTest do
   use ExApiWeb.ConnCase
-  use Bamboo.Test
+  use Bamboo.Test, shared: :true
 
   alias ExApiWeb.{User, Bookmark, Email}
   alias ExApi.Repo
